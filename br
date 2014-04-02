@@ -1,0 +1,35 @@
+#!/bin/bash
+if [ -z "$1" ]
+then
+	i=40
+else
+	i=$1
+fi
+echo $i
+[ ! -f ~/.brightness/brightness_value ] && mkdir -p ~/.brightness && echo 88 > .brightness/brightness_value
+j=$(cat ~/.brightness/brightness_value)
+j=$((16#$j))
+echo $j >> ~/test
+if [ "$i" = "40" ]
+then 
+	echo "DOWN" >> ~/test
+	j=$((j+16))
+else
+	echo "UP" >> ~/test
+	j=$((j-16))
+fi
+if [ $j -lt 0 ]
+then 
+	echo "Setting k to 0 " >> ~/test
+	j=0
+fi
+if [ $j -gt 255 ]
+then 
+	echo "Setting k to FF" >> ~/test 
+	j=255
+fi
+k=$(echo "ibase=10;obase=16;$j" | bc)
+echo $k $j >> ~/test
+echo $k > ~/.brightness/brightness_value
+
+sudo setpci -s 00:02.0 f4.b=$k
